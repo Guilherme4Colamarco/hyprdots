@@ -57,25 +57,16 @@ if [ -d "$2" ]; then
     Theme_Dir="$2"
 else
     Git_Repo=${2%/}
+    branch=""
     if echo "$Git_Repo" | grep -q "/tree/"; then
         branch=${Git_Repo#*tree/}
         Git_Repo=${Git_Repo%/tree/*}
-    else
-        branches=$(curl -s "https://api.github.com/repos/${Git_Repo#*://*/}/branches" | jq -r '.[].name')
-        branches=($branches)
-        if [[ ${#branches[@]} -le 1 ]]; then
-            branch=${branches[0]}
-        else
-            echo "Select a Branch"
-            select branch in "${branches[@]}"; do
-                [[ -n $branch ]] && break || echo "Invalid selection. Please try again."
-            done
-        fi
     fi
 
     Git_Path=${Git_Repo#*://*/}
     Git_Owner=${Git_Path%/*}
     branch_dir=${branch//\//_}
+    [ -z "${branch_dir}" ] && branch_dir="default"
     Theme_Dir="${cacheDir}/themepatcher/${branch_dir}-${Git_Owner}"
 
     if [ -d "$Theme_Dir" ]; then
@@ -89,7 +80,11 @@ else
         fi
     else
         print_prompt "Directory $Theme_Dir does not exist. Cloning repository into new directory."
-        git clone -b "$branch" --depth 1 "$Git_Repo" "$Theme_Dir" &> /dev/null
+        if [ -n "${branch}" ]; then
+            git clone -b "$branch" --depth 1 "$Git_Repo" "$Theme_Dir" &> /dev/null
+        else
+            git clone --depth 1 "$Git_Repo" "$Theme_Dir" &> /dev/null
+        fi
         if [ $? -ne 0 ]; then
             print_prompt "Git clone failed"
             exit 1
