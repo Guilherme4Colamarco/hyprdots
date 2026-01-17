@@ -212,7 +212,9 @@ if [[ "$assets_mode" != "none" ]]; then
     if [[ -z "$theme_link" || "$theme_link" == "null" ]]; then
       echo "[assets] aviso: não achei LINK do tema '$theme_name' em hyde-themes.json; pulando assets." >&2
     else
-      (cd "$scrDir" && ./themepatcher.sh "$theme_name" "$theme_link" --skipcaching true)
+      if ! (cd "$scrDir" && ./themepatcher.sh "$theme_name" "$theme_link" --skipcaching true); then
+        echo "[assets] aviso: themepatcher falhou para '$theme_name'; pulando assets." >&2
+      fi
     fi
   else
     echo "[assets] extraindo assets de todos os temas em ~/.config/hyde/themes (pode demorar)..."
@@ -224,7 +226,9 @@ if [[ "$assets_mode" != "none" ]]; then
             echo "[assets] skip: sem LINK no gallery para '$theme_name'" >&2
             continue
           fi
-          "$scrDir/themepatcher.sh" "$theme_name" "$theme_link" --skipcaching true
+          "$scrDir/themepatcher.sh" "$theme_name" "$theme_link" --skipcaching true || {
+            echo "[assets] aviso: themepatcher falhou para '$theme_name'." >&2
+          }
         done
   fi
 
