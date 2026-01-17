@@ -65,12 +65,18 @@ cat "${CfgLst}" | while read lst; do
             mkdir -p "${pth}"
         fi
 
+        src="${CfgDir}${tgt}/${cfg_chk}"
+        if [ ! -e "${src}" ]; then
+            echo -e "\033[0;33m[skip]\033[0m missing source ${src}..."
+            continue
+        fi
+
         if [ ! -f "${pth}/${cfg_chk}" ]; then
-            cp -r "${CfgDir}${tgt}/${cfg_chk}" "${pth}"
-            echo -e "\033[0;32m[restore]\033[0m ${pth} <-- ${CfgDir}${tgt}/${cfg_chk}..."
+            cp -r "${src}" "${pth}"
+            echo -e "\033[0;32m[restore]\033[0m ${pth} <-- ${src}..."
         elif [ "${ovrWrte}" == "Y" ]; then
-            cp -r "${CfgDir}$tgt/${cfg_chk}" "${pth}"
-            echo -e "\033[0;33m[overwrite]\033[0m ${pth} <-- ${CfgDir}${tgt}/${cfg_chk}..."
+            cp -r "${src}" "${pth}"
+            echo -e "\033[0;33m[overwrite]\033[0m ${pth} <-- ${src}..."
         else
             echo -e "\033[0;33m[preserve]\033[0m Skipping ${pth}/${cfg_chk} to preserve user setting..."
         fi
